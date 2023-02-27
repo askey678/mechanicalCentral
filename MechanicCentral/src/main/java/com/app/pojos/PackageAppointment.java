@@ -20,9 +20,9 @@ import lombok.ToString;
 public class PackageAppointment extends BaseEntity{
 	@ManyToOne
 	@JoinColumn(name = "package_id")
-	private Long package_id;
+	private Package package_id;
 	@ManyToOne
 	@JoinColumn(name = "appointment_id")
-	private Long appointment_id;
+	private Appointment appointment_id;
 
 }

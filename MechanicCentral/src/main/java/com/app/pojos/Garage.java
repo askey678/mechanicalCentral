@@ -3,6 +3,7 @@ package com.app.pojos;
 import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString(exclude = "password")
+@Entity
 
 public class Garage extends BaseEntity {
 	@Column(length = 50, name = "g_name")
