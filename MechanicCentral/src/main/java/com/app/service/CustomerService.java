@@ -6,7 +6,7 @@ import com.app.pojos.Customer;
 
 public interface CustomerService {
 	List<Customer> getallcustomer();
-	Customer getCustomer();
-	Customer AddCustomer(Customer newcust);
+	Customer getCustomer(Long id);
+	Customer addCustomer(Customer newcust);
 
 }
