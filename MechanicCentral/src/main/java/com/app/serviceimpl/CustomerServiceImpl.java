@@ -1,4 +1,4 @@
-package com.app.service;
+package com.app.serviceimpl;
 
 import java.util.List;
 
@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.app.pojos.Customer;
 import com.app.repository.CustomerRepo;
+import com.app.service.CustomerService;
 
 @Service
 @Transactional
@@ -24,14 +25,28 @@ public class CustomerServiceImpl implements CustomerService {
 		return custrepo.findAll();
 	}
 
-	@Override
-	public Customer getCustomer(Long id) {
-		return custrepo.findById(id).orElse(null);
-	}
-
+	
 	@Override
 	public Customer addCustomer(Customer newcust) {
 		return custrepo.save(newcust);
+	}
+
+	@Override
+	public Customer getCustomerbyId(Long id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Customer updateUser(Customer cust, Long custId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteUser(Integer userId) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

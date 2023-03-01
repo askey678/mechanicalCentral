@@ -1,4 +1,4 @@
-package com.app.service;
+package com.app.serviceimpl;
 
 public class GarageServiceImpl {
 

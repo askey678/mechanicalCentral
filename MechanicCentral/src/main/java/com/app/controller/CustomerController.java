@@ -1,5 +1,6 @@
 package com.app.controller;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,23 +31,23 @@ public class CustomerController {
 	private Customer addcustomer(@RequestBody Customer newCust) {
 		return custServ.addCustomer(newCust);
 	}
+//
+//	@GetMapping("/{id}")
+//	public ResponseEntity<CustomerDTO> getCustomer(@PathVariable Long id) {
+//		Customer customer = custServ.getCustomer(id);
+//		if (customer == null) {
+//			return ResponseEntity.notFound().build();
+//		}
+//		CustomerDTO customerDTO = convertToDTO(customer);
+//		return ResponseEntity.ok(customerDTO);
+//	}
 
-	@GetMapping("/{id}")
-	public ResponseEntity<CustomerDTO> getCustomer(@PathVariable Long id) {
-		Customer customer = custServ.getCustomer(id);
-		if (customer == null) {
-			return ResponseEntity.notFound().build();
-		}
-		CustomerDTO customerDTO = convertToDTO(customer);
-		return ResponseEntity.ok(customerDTO);
-	}
-
-	@PostMapping
-	public ResponseEntity<CustomerDTO> addCustomer(@RequestBody CustomerDTO customerDTO) {
-		Customer customer = convertToEntity(customerDTO);
-		Customer savedCustomer = custServ.addCustomer(customer);
-		CustomerDTO savedCustomerDTO = convertToDTO(savedCustomer);
-		return ResponseEntity.status(HttpStatus.CREATED).body(savedCustomerDTO);
-	}
+//	@PostMapping
+//	public ResponseEntity<CustomerDTO> addCustomer(@RequestBody CustomerDTO customerDTO) {
+//		Customer customer = convertToEntity(customerDTO);
+//		Customer savedCustomer = custServ.addCustomer(customer);
+//		CustomerDTO savedCustomerDTO = convertToDTO(savedCustomer);
+//		return ResponseEntity.status(HttpStatus.CREATED).body(savedCustomerDTO);
+//	}
 
 }
