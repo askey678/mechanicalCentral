@@ -2,6 +2,8 @@ package com.app.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,7 @@ public class CustomerController {
 	}
 
 	@PostMapping("/")
-	public ResponseEntity<Customerdto> createCustomer(@RequestBody Customerdto custdto) {
+	public ResponseEntity<Customerdto> createCustomer(@Valid @RequestBody Customerdto custdto) {
 		Customerdto customerdto = custServ.addCustomer(custdto);
 		return new ResponseEntity<Customerdto>(customerdto, HttpStatus.CREATED);
 	}
@@ -39,8 +41,13 @@ public class CustomerController {
 		return ResponseEntity.ok(custServ.getallcustomer());
 	}
 
+	@GetMapping("/{UserId}")
+	public ResponseEntity<Customerdto> getCustomerbyId(@PathVariable Long UserId) {
+		return ResponseEntity.ok(custServ.getCustomerbyId(UserId));
+	}
+
 	@PutMapping("/{CustId}")
-	public ResponseEntity<Customerdto> updateCustomer(@RequestBody Customerdto custdto, @PathVariable Long CustId) {
+	public ResponseEntity<Customerdto> updateCustomer(@Valid @RequestBody Customerdto custdto, @PathVariable Long CustId) {
 		Customerdto updatedcust = custServ.updateUser(custdto, CustId);
 		return ResponseEntity.ok(updatedcust);
 	}

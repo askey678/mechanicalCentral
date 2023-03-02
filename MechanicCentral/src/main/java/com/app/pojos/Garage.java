@@ -25,7 +25,7 @@ public class Garage extends BaseEntity {
 	@Column(length = 200, name = "g_address")
 	private String address;
 	@Column(length = 12, name = "g_mobile")
-	private Long mobile;
+	private String mobile;
 	@Column(length = 30, name = "g_email", unique = true, nullable = false)
 	private String email;
 	@Column(length = 30, name = "g_password")
