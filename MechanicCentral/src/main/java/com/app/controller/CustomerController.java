@@ -1,18 +1,21 @@
 package com.app.controller;
 
-import org.modelmapper.ModelMapper;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.app.dto.CustomerDTO;
-import com.app.pojos.Customer;
+import com.app.dto.ApiResponse;
+import com.app.dto.Customerdto;
 import com.app.service.CustomerService;
 
 @RestController
@@ -20,34 +23,33 @@ import com.app.service.CustomerService;
 public class CustomerController {
 	@Autowired
 	private CustomerService custServ;
-	@Autowired
-	private ModelMapper mapper;
 
 	public CustomerController() {
 		super();
 	}
 
-	@PostMapping
-	private Customer addcustomer(@RequestBody Customer newCust) {
-		return custServ.addCustomer(newCust);
+	@PostMapping("/")
+	public ResponseEntity<Customerdto> createCustomer(@RequestBody Customerdto custdto) {
+		Customerdto customerdto = custServ.addCustomer(custdto);
+		return new ResponseEntity<Customerdto>(customerdto, HttpStatus.CREATED);
 	}
-//
-//	@GetMapping("/{id}")
-//	public ResponseEntity<CustomerDTO> getCustomer(@PathVariable Long id) {
-//		Customer customer = custServ.getCustomer(id);
-//		if (customer == null) {
-//			return ResponseEntity.notFound().build();
-//		}
-//		CustomerDTO customerDTO = convertToDTO(customer);
-//		return ResponseEntity.ok(customerDTO);
-//	}
 
-//	@PostMapping
-//	public ResponseEntity<CustomerDTO> addCustomer(@RequestBody CustomerDTO customerDTO) {
-//		Customer customer = convertToEntity(customerDTO);
-//		Customer savedCustomer = custServ.addCustomer(customer);
-//		CustomerDTO savedCustomerDTO = convertToDTO(savedCustomer);
-//		return ResponseEntity.status(HttpStatus.CREATED).body(savedCustomerDTO);
-//	}
+	@GetMapping("/")
+	public ResponseEntity<List<Customerdto>> getallCustomers() {
+		return ResponseEntity.ok(custServ.getallcustomer());
+	}
+
+	@PutMapping("/{CustId}")
+	public ResponseEntity<Customerdto> updateCustomer(@RequestBody Customerdto custdto, @PathVariable Long CustId) {
+		Customerdto updatedcust = custServ.updateUser(custdto, CustId);
+		return ResponseEntity.ok(updatedcust);
+	}
+
+	@DeleteMapping("/{CustId}")
+	public ResponseEntity<ApiResponse> deleteCustomer(@PathVariable("CustId") Long cid) {
+		custServ.deleteUser(cid);
+		return new ResponseEntity<ApiResponse>(new ApiResponse("Customer deleted successfully", true), HttpStatus.OK);
+
+	}
 
 }
