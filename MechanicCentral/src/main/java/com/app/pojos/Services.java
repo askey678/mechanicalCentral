@@ -22,7 +22,7 @@ import lombok.ToString;
 @Setter
 @ToString
 
-public class Service extends BaseEntity {
+public class Services extends BaseEntity {
 	@Column(length = 60, name = "service_name")
 	private String name;
 	@Column(length = 400, name = "service_desc")

@@ -37,5 +37,5 @@ public class Appointment extends BaseEntity {
 	private AppointmentStatus status;
 
 	@ManyToMany(mappedBy = "appointments", cascade = { CascadeType.ALL })
-    private Set<Service> services = new HashSet<Service>();
+    private Set<Services> services = new HashSet<Services>();
 }

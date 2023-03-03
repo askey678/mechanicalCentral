@@ -20,7 +20,7 @@ import lombok.ToString;
 @ToString
 
 @Entity
-public class Package extends BaseEntity {
+public class Packages extends BaseEntity {
 
 	@Column(length = 50, name = "pkg_name")
 	private String name;
