@@ -3,8 +3,10 @@ package com.app.pojos;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -20,7 +22,7 @@ import lombok.ToString;
 @Entity
 @ToString(exclude = "password")
 @Table(name = "Customer")
-public class Customer extends BaseEntity{
+public class Customer extends BaseEntity {
 
 	@Column(length = 50, name = "cust_name", nullable = false)
 	private String name;
@@ -31,9 +33,7 @@ public class Customer extends BaseEntity{
 	@Column(length = 50, name = "cust_pass", nullable = false)
 	private String password;
 
-	@OneToMany(mappedBy = "customer")
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Appointment> appointments = new ArrayList<>();
 
-
-	
 }

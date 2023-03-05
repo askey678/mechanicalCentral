@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -36,6 +37,13 @@ public class Appointment extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private AppointmentStatus status;
 
+	@Column(name = "Date")
+	private String date;
+	@Column(name = "Time")
+	private String time;
+
+	private boolean onSpotMechanic;
+
 	@ManyToMany(mappedBy = "appointments", cascade = { CascadeType.ALL })
-    private Set<Services> services = new HashSet<Services>();
+	private Set<Services> services = new HashSet<Services>();
 }
