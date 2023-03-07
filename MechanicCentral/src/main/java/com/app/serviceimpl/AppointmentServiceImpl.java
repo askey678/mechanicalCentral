@@ -24,7 +24,7 @@ import com.app.pojos.Garage;
 import com.app.pojos.Packages;
 import com.app.pojos.ServiceType;
 import com.app.pojos.Services;
-import com.app.repository.AppointmentRepo;
+import com.app.repository.AppointmentRequestrepo;
 import com.app.repository.CustomerRepo;
 import com.app.repository.GarageRepo;
 import com.app.repository.PackageRepo;
@@ -36,8 +36,10 @@ import com.app.service.AppointmentService;
 public class AppointmentServiceImpl implements AppointmentService {
 
 	@Autowired
-	private AppointmentRepo appointmentrepo;
+	private AppointmentRequestrepo appointmentreqrepo;
 
+//	@Autowired
+//	private AppointmentRepo appointmentrepo;
 	@Autowired
 	private CustomerRepo customerrepo;
 
@@ -53,145 +55,166 @@ public class AppointmentServiceImpl implements AppointmentService {
 	private PackageRepo packagerepo;
 
 	@Override
-	public AppointmentResponsedto bookAppointment(Long customerId, AppointmentRequestdto appointmentRequest) {
+	public AppointmentResponsedto bookAppointment(Long customerId, AppointmentRequestdto appointmentreqdto) {
 
 		Customer customer = customerrepo.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer", "id", customerId));
-		Appointment appointment = new Appointment();
-		appointment.setCustomer(customer);
-		appointment.setStatus(AppointmentStatus.PENDING);
-		appointment.setType(appointmentRequest.getServicetype());
-		// set date
-
-		LocalDate currentDate = LocalDate.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		String formattedDate = currentDate.format(formatter);
-		appointment.setDate(formattedDate);
-		// set time
-		LocalTime currentTime = LocalTime.now();
-		DateTimeFormatter formating = DateTimeFormatter.ofPattern("HH:mm:ss");
-		String formattedTime = currentTime.format(formating);
-		appointment.setTime(formattedTime);
-
-		// Determine which service type the appointment request is for
-
-		if (appointmentRequest.getServicetype() == ServiceType.SERVICES) {
-			// Find the requested services by ID and add them to the appointment
-			Set<Services> services = new HashSet<>();
-			for (Long serviceId : appointmentRequest.getServiceIds()) {
-				Services service = servicerepo.findById(serviceId)
-						.orElseThrow(() -> new ResourceNotFoundException("Service", "id", serviceId));
-				services.add(service);
-			}
-			appointment.setServices(services);
-		} else if (appointmentRequest.getServicetype() == ServiceType.PACKAGE) {
-			// Find the requested package by ID and add it to the appointment
-			Packages packages = packagerepo.findById(appointmentRequest.getPackageId()).orElseThrow(
-					() -> new ResourceNotFoundException("Package", "id", appointmentRequest.getPackageId()));
-			appointment.setPackagee(packages);
-		} else if (appointmentRequest.getServicetype() == ServiceType.ONSPOTMECHANIC) {
-
-			appointment.setOnSpotMechanic(appointmentRequest.isOnSpotMechanic());
-		}
-
-//		 Find all garages and send the appointment request to each of them
 		List<Garage> garages = garagerepo.findAll();
+		
 		for (Garage garage : garages) {
-			garage.AddAppointmentsRequests(modelmapper.map(appointmentRequest, AppointmentRequest.class));
+		    AppointmentRequest appointmentreq = new AppointmentRequest();
+		    appointmentreq.setCustomer(customer);
+		    appointmentreq.setStatus(AppointmentStatus.PENDING);
+		    appointmentreq.setType(appointmentreqdto.getServicetype());
+		    // set date
+		    LocalDate currentDate = LocalDate.now();
+		    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		    String formattedDate = currentDate.format(formatter);
+		    appointmentreq.setDate(formattedDate);
+		    // set time
+		    LocalTime currentTime = LocalTime.now();
+		    DateTimeFormatter formating = DateTimeFormatter.ofPattern("HH:mm:ss");
+		    String formattedTime = currentTime.format(formating);
+		    appointmentreq.setTime(formattedTime);
+
+		    // Determine which service type the appointmentreq request is for
+
+		    if (appointmentreqdto.getServicetype() == ServiceType.SERVICES) {
+		        // Find the requested services by ID and add them to the appointmentreq
+		        Set<Services> services = new HashSet<>();
+		        for (Long serviceId : appointmentreqdto.getServiceIds()) {
+		            Services service = servicerepo.findById(serviceId)
+		                    .orElseThrow(() -> new ResourceNotFoundException("Service", "id", serviceId));
+		            services.add(service);
+
+		        }
+		        appointmentreq.setServices(services);
+		    } else if (appointmentreqdto.getServicetype() == ServiceType.PACKAGE) {
+		        // Find the requested package by ID and add it to the appointmentreq
+		        Packages packages = packagerepo.findById(appointmentreqdto.getPackageId()).orElseThrow(
+		                () -> new ResourceNotFoundException("Package", "id", appointmentreqdto.getPackageId()));
+		        appointmentreq.setPackagee(packages);
+		    } else if (appointmentreqdto.getServicetype() == ServiceType.ONSPOTMECHANIC) {
+		        appointmentreq.setOnSpotMechanic(appointmentreqdto.isOnSpotMechanic());
+		    }
+		    appointmentreq.setGarage(garage);
+		    // set other properties of appointmentRequest
+		    garage.getAppointmentRequests().add(appointmentreq);
+		    garagerepo.save(garage);
+//		    appointmentreqrepo.save(appointmentreq);
 		}
-
+//		AppointmentRequest appointmentreq = new AppointmentRequest();
+//		appointmentreq.setCustomer(customer);
+//		appointmentreq.setStatus(AppointmentStatus.PENDING);
+//		appointmentreq.setType(appointmentreqdto.getServicetype());
+//		// set date
 //
-//			if (response.isAccepted()) {
-//				// If the garage accepted the appointment, assign it to the appointment and
-//				// break the loop
-//				appointment.setGarage(garage);
-//				appointment.setStatus(AppointmentStatus.ACCEPTED);
-//				break;
+//		LocalDate currentDate = LocalDate.now();
+//		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+//		String formattedDate = currentDate.format(formatter);
+//		appointmentreq.setDate(formattedDate);
+//		// set time
+//		LocalTime currentTime = LocalTime.now();
+//		DateTimeFormatter formating = DateTimeFormatter.ofPattern("HH:mm:ss");
+//		String formattedTime = currentTime.format(formating);
+//		appointmentreq.setTime(formattedTime);
+//
+//		// Determine which service type the appointmentreq request is for
+//
+//		if (appointmentreqdto.getServicetype() == ServiceType.SERVICES) {
+//			// Find the requested services by ID and add them to the appointmentreq
+//			Set<Services> services = new HashSet<>();
+//			for (Long serviceId : appointmentreqdto.getServiceIds()) {
+//				Services service = servicerepo.findById(serviceId)
+//						.orElseThrow(() -> new ResourceNotFoundException("Service", "id", serviceId));
+//				services.add(service);
+//
 //			}
+//			appointmentreq.setServices(services);
+//		} else if (appointmentreqdto.getServicetype() == ServiceType.PACKAGE) {
+//			// Find the requested package by ID and add it to the appointmentreq
+//			Packages packages = packagerepo.findById(appointmentreqdto.getPackageId()).orElseThrow(
+//					() -> new ResourceNotFoundException("Package", "id", appointmentreqdto.getPackageId()));
+//			appointmentreq.setPackagee(packages);
+//		} else if (appointmentreqdto.getServicetype() == ServiceType.ONSPOTMECHANIC) {
+//
+//			appointmentreq.setOnSpotMechanic(appointmentreqdto.isOnSpotMechanic());
+//		}
+//		// Save the appointmentreq to the database
+//		appointmentreqrepo.save(appointmentreq);
+//
+////		 Find all garages and send the appointmentreq request to each of them
+//		List<Garage> garages = garagerepo.findAll();
+//		for (Garage garage : garages) {
+//
+//			appointmentreq.setGarage(garage);
+//			// set other properties of appointmentRequest
+//			garage.getAppointmentRequests().add(appointmentreq);
+//			System.out.println(garage);
+//			garagerepo.save(garage);
+//			appointmentreqrepo.save(appointmentreq);
+//		}
 
-		// Save the appointment to the database
-		appointmentrepo.save(appointment);
-		return modelmapper.map(appointment, AppointmentResponsedto.class);
+//		return modelmapper.map(appointmentreq, AppointmentResponsedto.class);
+		return null;
 	}
 
 	@Override
 	public List<Appointment> getAllAppointments() {
-		List<Appointment> appointments = appointmentrepo.findAll();
-		return appointments;
-	}
-
-//	@Override
-//	public List<Appointment> getCancelledAppointments() {
-//		return appointmentrepo.findBystatusCANCELLED();
-//
-//	}
-
-	@Override
-	public List<Appointment> getAppointmentsByGarageAndStatus(Long garageId, AppointmentStatus status) {
-		Garage garage = new Garage();
-		garage.setId(garageId);
-		List<Appointment> appointments = appointmentrepo.findByGarageAndStatus(garage, status);
-		return appointments;
-	}
-
-	@Override
-	public List<Appointment> getAppointmentsByCustomerAndStatus(Long customerId, AppointmentStatus status) {
-		Customer customer = new Customer();
-		customer.setId(customerId);
-		List<Appointment> appointments = appointmentrepo.findByCustomerAndStatus(customer, status);
-		return appointments;
-
+		return null;
 	}
 
 	@Override
 	public Appointment getAppointmentById(Long appointmentId) {
-
-		return appointmentrepo.findById(appointmentId)
-				.orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
-
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public AppointmentResponsedto updateAppointment(AppointmentRequestdto appointmentdto, Long appointmentId) {
-		Appointment appointment = appointmentrepo.findById(appointmentId)
-				.orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
-
-		// updating the appointment
-		return modelmapper.map(appointment, AppointmentResponsedto.class);
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public void deleteAppointment(Long appointmentId) {
-		Appointment appointment = appointmentrepo.findById(appointmentId)
-				.orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
-
-		appointmentrepo.delete(appointment);
+		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public List<Appointment> getAppointmentsByGarage(Long garageId) {
-		Garage garage = new Garage();
-		garage.setId(garageId);
-		return appointmentrepo.findByGarage(garage);
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public List<Appointment> getAppointmentsByCustomer(Long customerId) {
-		Customer customer = new Customer();
-		customer.setId(customerId);
-		return appointmentrepo.findByCustomer(customer);
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Appointment> getAppointmentsByGarageAndStatus(Long garageId, AppointmentStatus status) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Appointment> getAppointmentsByCustomerAndStatus(Long customerId, AppointmentStatus status) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 //	@Override
-//	public List<Appointment> getConfirmedAppointments() {
-//		return appointmentrepo.findBystatusCONFIRMED();
+//	public List<appointmentreq> getConfirmedappointmentreqs() {
+//		return appointmentreqrepo.findBystatusCONFIRMED();
 //	}
 //
 //	@Override
-//	public List<Appointment> getInProgressAppointments() {
+//	public List<appointmentreq> getInProgressappointmentreqs() {
 //
-//		return appointmentrepo.findBystatusINPROGRESS();
+//		return appointmentreqrepo.findBystatusINPROGRESS();
 //	}
 
 }

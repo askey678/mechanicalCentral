@@ -22,6 +22,7 @@ public class AppointmentController {
 	@PostMapping("/customer/{customerId}")
 	public ResponseEntity<?> createAppointment(@PathVariable Long customerId,
 			@RequestBody AppointmentRequestdto appointmentRequest) {
+		System.out.println(appointmentRequest);
 		try {
 			AppointmentResponsedto appointmentresponse = appointmentService.bookAppointment(customerId,
 					appointmentRequest);
