@@ -34,4 +34,9 @@ public class Services extends BaseEntity {
 	@JoinTable(name = "service_appointment", joinColumns = { @JoinColumn(name = "service_id") }, inverseJoinColumns = {
 			@JoinColumn(name = "appointment_id") })
 	Set<Appointment> appointments = new HashSet<Appointment>();
+	
+	@ManyToMany(cascade = { CascadeType.ALL })
+	@JoinTable(name = "service_appointment", joinColumns = { @JoinColumn(name = "service_id") }, inverseJoinColumns = {
+			@JoinColumn(name = "appointment_id") })
+	Set<AppointmentRequest> appointmentrequests = new HashSet<AppointmentRequest>();
 }

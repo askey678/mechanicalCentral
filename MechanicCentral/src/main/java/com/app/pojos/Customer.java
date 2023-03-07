@@ -35,5 +35,7 @@ public class Customer extends BaseEntity {
 
 	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Appointment> appointments = new ArrayList<>();
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<AppointmentRequest> appointmentrequests = new ArrayList<>();
 
 }

@@ -20,9 +20,9 @@ public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
 
 	List<Appointment> findByGarageAndStatus(Garage garage, AppointmentStatus status);
 
-	List<Appointment> findBystatusCONFIRMED();
-
-	List<Appointment> findBystatusINPROGRESS();
-
-	List<Appointment> findBystatusCANCELLED();
+//	List<Appointment> findBystatusCONFIRMED();
+//
+//	List<Appointment> findBystatusINPROGRESS();
+//
+//	List<Appointment> findBystatusCANCELLED();
 }

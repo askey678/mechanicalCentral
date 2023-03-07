@@ -2,19 +2,20 @@ package com.app.service;
 
 import java.util.List;
 
-import com.app.dto.Appointmentdto;
+import com.app.dto.AppointmentRequestdto;
+import com.app.dto.AppointmentResponsedto;
 import com.app.pojos.Appointment;
 import com.app.pojos.AppointmentStatus;
 
 public interface AppointmentService {
 
-	Appointment bookAppointment(Appointmentdto appointmentdto, Long customerId, Long garageId);
+	AppointmentResponsedto bookAppointment(Long customerId, AppointmentRequestdto appointmentdto);
 
 	List<Appointment> getAllAppointments();
 
 	Appointment getAppointmentById(Long appointmentId);
 
-	Appointment updateAppointment(Appointmentdto appointmentdto, Long appointmentId);
+	AppointmentResponsedto updateAppointment(AppointmentRequestdto appointmentdto, Long appointmentId);
 
 	void deleteAppointment(Long appointmentId);
 
@@ -26,10 +27,10 @@ public interface AppointmentService {
 
 	List<Appointment> getAppointmentsByCustomerAndStatus(Long customerId, AppointmentStatus status);
 
-	List<Appointment> getConfirmedAppointments();
-
-	List<Appointment> getInProgressAppointments();
-
-	List<Appointment> getCancelledAppointments();
+//	List<Appointment> getConfirmedAppointments();
+//
+//	List<Appointment> getInProgressAppointments();
+//
+//	List<Appointment> getCancelledAppointments();
 
 }

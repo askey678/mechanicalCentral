@@ -29,6 +29,11 @@ public class Packages extends BaseEntity {
 	@Column(length = 5, name = "pkg_price")
 	private Double price;
 
-	@OneToMany(mappedBy = "appointment_id")
-	private List<PackageAppointment> appointments = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "packagee")
+    private List<Appointment> appointments = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "packagee")
+    private List<AppointmentRequest> appointmentrequests = new ArrayList<>();
+
 }

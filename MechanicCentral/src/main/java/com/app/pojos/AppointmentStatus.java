@@ -1,6 +1,6 @@
 package com.app.pojos;
 
 public enum AppointmentStatus {
-	CONFIRMED, INPROGRESS, CANCELLED
+	CONFIRMED, INPROGRESS, CANCELLED, PENDING
 
 }

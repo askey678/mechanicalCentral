@@ -3,7 +3,9 @@ package com.app.serviceimpl;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.transaction.Transactional;
 
@@ -11,15 +13,22 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.app.dto.Appointmentdto;
+import com.app.dto.AppointmentRequestdto;
+import com.app.dto.AppointmentResponsedto;
 import com.app.exceptions.ResourceNotFoundException;
 import com.app.pojos.Appointment;
+import com.app.pojos.AppointmentRequest;
 import com.app.pojos.AppointmentStatus;
 import com.app.pojos.Customer;
 import com.app.pojos.Garage;
+import com.app.pojos.Packages;
+import com.app.pojos.ServiceType;
+import com.app.pojos.Services;
 import com.app.repository.AppointmentRepo;
 import com.app.repository.CustomerRepo;
 import com.app.repository.GarageRepo;
+import com.app.repository.PackageRepo;
+import com.app.repository.ServiceRepo;
 import com.app.service.AppointmentService;
 
 @Service
@@ -27,7 +36,7 @@ import com.app.service.AppointmentService;
 public class AppointmentServiceImpl implements AppointmentService {
 
 	@Autowired
-	private AppointmentRepo appointmentRepo;
+	private AppointmentRepo appointmentrepo;
 
 	@Autowired
 	private CustomerRepo customerrepo;
@@ -38,52 +47,90 @@ public class AppointmentServiceImpl implements AppointmentService {
 	@Autowired
 	private ModelMapper modelmapper;
 
+	@Autowired
+	private ServiceRepo servicerepo;
+	@Autowired
+	private PackageRepo packagerepo;
+
 	@Override
-	public Appointment bookAppointment(Appointmentdto appointmentdto, Long customerId, Long garageId) {
+	public AppointmentResponsedto bookAppointment(Long customerId, AppointmentRequestdto appointmentRequest) {
 
 		Customer customer = customerrepo.findById(customerId)
 				.orElseThrow(() -> new ResourceNotFoundException("Customer", "id", customerId));
-
-		Garage garage = garagerepo.findById(garageId)
-				.orElseThrow(() -> new ResourceNotFoundException("Garage", "id", garageId));
-
-		Appointment appointment = modelmapper.map(appointmentdto, Appointment.class);
-		appointment.setStatus(AppointmentStatus.valueOf("PENDING"));
+		Appointment appointment = new Appointment();
 		appointment.setCustomer(customer);
-		appointment.setGarage(garage);
+		appointment.setStatus(AppointmentStatus.PENDING);
+		appointment.setType(appointmentRequest.getServicetype());
 		// set date
 
 		LocalDate currentDate = LocalDate.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		String formattedDate = currentDate.format(formatter);
 		appointment.setDate(formattedDate);
-
 		// set time
 		LocalTime currentTime = LocalTime.now();
 		DateTimeFormatter formating = DateTimeFormatter.ofPattern("HH:mm:ss");
 		String formattedTime = currentTime.format(formating);
 		appointment.setTime(formattedTime);
 
-		// set AppointmentServicetype
-		appointment.setType(appointmentdto.getType());
+		// Determine which service type the appointment request is for
 
-		// save
-		Appointment appointed = appointmentRepo.save(appointment);
+		if (appointmentRequest.getServicetype() == ServiceType.SERVICES) {
+			// Find the requested services by ID and add them to the appointment
+			Set<Services> services = new HashSet<>();
+			for (Long serviceId : appointmentRequest.getServiceIds()) {
+				Services service = servicerepo.findById(serviceId)
+						.orElseThrow(() -> new ResourceNotFoundException("Service", "id", serviceId));
+				services.add(service);
+			}
+			appointment.setServices(services);
+		} else if (appointmentRequest.getServicetype() == ServiceType.PACKAGE) {
+			// Find the requested package by ID and add it to the appointment
+			Packages packages = packagerepo.findById(appointmentRequest.getPackageId()).orElseThrow(
+					() -> new ResourceNotFoundException("Package", "id", appointmentRequest.getPackageId()));
+			appointment.setPackagee(packages);
+		} else if (appointmentRequest.getServicetype() == ServiceType.ONSPOTMECHANIC) {
 
-		return appointed;
+			appointment.setOnSpotMechanic(appointmentRequest.isOnSpotMechanic());
+		}
+
+//		 Find all garages and send the appointment request to each of them
+		List<Garage> garages = garagerepo.findAll();
+		for (Garage garage : garages) {
+			garage.AddAppointmentsRequests(modelmapper.map(appointmentRequest, AppointmentRequest.class));
+		}
+
+//
+//			if (response.isAccepted()) {
+//				// If the garage accepted the appointment, assign it to the appointment and
+//				// break the loop
+//				appointment.setGarage(garage);
+//				appointment.setStatus(AppointmentStatus.ACCEPTED);
+//				break;
+//			}
+
+		// Save the appointment to the database
+		appointmentrepo.save(appointment);
+		return modelmapper.map(appointment, AppointmentResponsedto.class);
 	}
 
 	@Override
 	public List<Appointment> getAllAppointments() {
-		List<Appointment> appointments = appointmentRepo.findAll();
+		List<Appointment> appointments = appointmentrepo.findAll();
 		return appointments;
 	}
+
+//	@Override
+//	public List<Appointment> getCancelledAppointments() {
+//		return appointmentrepo.findBystatusCANCELLED();
+//
+//	}
 
 	@Override
 	public List<Appointment> getAppointmentsByGarageAndStatus(Long garageId, AppointmentStatus status) {
 		Garage garage = new Garage();
 		garage.setId(garageId);
-		List<Appointment> appointments = appointmentRepo.findByGarageAndStatus(garage, status);
+		List<Appointment> appointments = appointmentrepo.findByGarageAndStatus(garage, status);
 		return appointments;
 	}
 
@@ -91,7 +138,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 	public List<Appointment> getAppointmentsByCustomerAndStatus(Long customerId, AppointmentStatus status) {
 		Customer customer = new Customer();
 		customer.setId(customerId);
-		List<Appointment> appointments = appointmentRepo.findByCustomerAndStatus(customer, status);
+		List<Appointment> appointments = appointmentrepo.findByCustomerAndStatus(customer, status);
 		return appointments;
 
 	}
@@ -99,26 +146,26 @@ public class AppointmentServiceImpl implements AppointmentService {
 	@Override
 	public Appointment getAppointmentById(Long appointmentId) {
 
-		return appointmentRepo.findById(appointmentId)
+		return appointmentrepo.findById(appointmentId)
 				.orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
 
 	}
 
 	@Override
-	public Appointment updateAppointment(Appointmentdto appointmentdto, Long appointmentId) {
-		Appointment appointment = appointmentRepo.findById(appointmentId)
+	public AppointmentResponsedto updateAppointment(AppointmentRequestdto appointmentdto, Long appointmentId) {
+		Appointment appointment = appointmentrepo.findById(appointmentId)
 				.orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
 
 		// updating the appointment
-		return appointment;
+		return modelmapper.map(appointment, AppointmentResponsedto.class);
 	}
 
 	@Override
 	public void deleteAppointment(Long appointmentId) {
-		Appointment appointment = appointmentRepo.findById(appointmentId)
+		Appointment appointment = appointmentrepo.findById(appointmentId)
 				.orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
 
-		appointmentRepo.delete(appointment);
+		appointmentrepo.delete(appointment);
 
 	}
 
@@ -126,31 +173,25 @@ public class AppointmentServiceImpl implements AppointmentService {
 	public List<Appointment> getAppointmentsByGarage(Long garageId) {
 		Garage garage = new Garage();
 		garage.setId(garageId);
-		return appointmentRepo.findByGarage(garage);
+		return appointmentrepo.findByGarage(garage);
 	}
 
 	@Override
 	public List<Appointment> getAppointmentsByCustomer(Long customerId) {
 		Customer customer = new Customer();
 		customer.setId(customerId);
-		return appointmentRepo.findByCustomer(customer);
+		return appointmentrepo.findByCustomer(customer);
 	}
 
-	@Override
-	public List<Appointment> getConfirmedAppointments() {
-		return appointmentRepo.findBystatusCONFIRMED();
-	}
-
-	@Override
-	public List<Appointment> getInProgressAppointments() {
-
-		return appointmentRepo.findBystatusINPROGRESS();
-	}
-
-	@Override
-	public List<Appointment> getCancelledAppointments() {
-		return appointmentRepo.findBystatusCANCELLED();
-
-	}
+//	@Override
+//	public List<Appointment> getConfirmedAppointments() {
+//		return appointmentrepo.findBystatusCONFIRMED();
+//	}
+//
+//	@Override
+//	public List<Appointment> getInProgressAppointments() {
+//
+//		return appointmentrepo.findBystatusINPROGRESS();
+//	}
 
 }

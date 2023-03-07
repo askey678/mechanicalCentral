@@ -16,16 +16,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 
 @Entity
-public class Appointment extends BaseEntity {
+public class AppointmentRequest extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "cust_id")
 	private Customer customer;
@@ -44,7 +42,7 @@ public class Appointment extends BaseEntity {
 
 	private boolean onSpotMechanic;
 
-	@ManyToMany(mappedBy = "appointments", cascade = { CascadeType.ALL })
+	@ManyToMany(mappedBy = "appointmentrequests", cascade = { CascadeType.ALL })
 	private Set<Services> services = new HashSet<Services>();
 
 	// an Appointment can have only one Package assigned to it, and a Package can be
