@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.app.dto.AppointmentRequestdto;
 import com.app.dto.AppointmentResponsedto;
+import com.app.dto.AppointmentResponsewithPaging;
 import com.app.pojos.Appointment;
 import com.app.pojos.AppointmentStatus;
 
@@ -11,17 +12,17 @@ public interface AppointmentService {
 
 	AppointmentResponsedto bookAppointment(Long customerId, AppointmentRequestdto appointmentdto);
 
-	List<Appointment> getAllAppointments();
+	AppointmentResponsewithPaging getAllAppointments(Integer pagenumber, Integer pagesize);
 
-	Appointment getAppointmentById(Long appointmentId);
+	AppointmentResponsedto getAppointmentById(Long appointmentId);
 
 	AppointmentResponsedto updateAppointment(AppointmentRequestdto appointmentdto, Long appointmentId);
 
 	void deleteAppointment(Long appointmentId);
 
-	List<Appointment> getAppointmentsByGarage(Long garageId);
+	List<AppointmentResponsedto> getAppointmentsByGarage(Long garageId);
 
-	List<Appointment> getAppointmentsByCustomer(Long customerId);
+	List<AppointmentResponsedto> getAppointmentsByCustomer(Long customerId);
 
 	List<Appointment> getAppointmentsByGarageAndStatus(Long garageId, AppointmentStatus status);
 

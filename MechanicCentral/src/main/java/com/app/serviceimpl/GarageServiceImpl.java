@@ -13,9 +13,14 @@ import javax.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.app.dto.AppointmentRequestdto;
+import com.app.dto.AppointmentResponseWithPagingAndSorting;
 import com.app.dto.AppointmentResponsedto;
 import com.app.dto.Garagedto;
 import com.app.exceptions.ResourceNotFoundException;
@@ -44,15 +49,7 @@ public class GarageServiceImpl implements GarageService {
 	@Autowired
 	private ModelMapper modelmapper;
 
-	@Autowired
-	private CustomerRepo customerrepo;
-
-	@Autowired
-	private ServiceRepo servicerepo;
-
-	@Autowired
-	private PackageRepo packagerepo;
-
+	
 	@Autowired
 	private AppointmentRepo appointmentrepo;
 
@@ -149,7 +146,7 @@ public class GarageServiceImpl implements GarageService {
 		} else if (appointmentreq.getType() == ServiceType.PACKAGE) {
 			// Find the requested package by ID and add it to the appointmentreq
 			Packages packages = appointmentreq.getPackagee();
-					
+
 			appointment.setPackagee(packages);
 		} else if (appointmentreq.getType() == ServiceType.ONSPOTMECHANIC) {
 
@@ -196,22 +193,82 @@ public class GarageServiceImpl implements GarageService {
 			AppointmentResponsedto appointmentResponseDto = modelmapper.map(appointmentRequest,
 					AppointmentResponsedto.class);
 			appointmentResponseDto.setCustomerId(appointmentRequest.getCustomer().getId());
+			appointmentResponseDto.setCustomername(appointmentRequest.getCustomer().getName());
 			appointmentResponseDto.setGarageId(appointmentRequest.getGarage().getId());
+			appointmentResponseDto.setGaragename(appointmentRequest.getGarage().getName());
+			appointmentResponseDto.setGarageaddress(appointmentRequest.getGarage().getAddress());
+			appointmentResponseDto.setGaragemob(appointmentRequest.getGarage().getMobile());
 			if (appointmentRequest.getPackagee() != null) {
-				appointmentResponseDto.setPackageId(appointmentRequest.getPackagee().getId());
-			}
-			Set<Services> services = appointmentRequest.getServices();
-			if (services != null && !services.isEmpty()) {
-				Set<Long> serviceIds = new HashSet<>();
-				for (Services service : services) {
-					serviceIds.add(service.getId());
+				appointmentResponseDto.setPackage_name(appointmentRequest.getPackagee().getName());
+			} else if (appointmentRequest.getServices() != null && !appointmentRequest.getServices().isEmpty()) {
+				Set<String> servicenames = new HashSet<>();
+				for (Services service : appointmentRequest.getServices()) {
+					servicenames.add(service.getName());
 				}
-				appointmentResponseDto.setServiceIds(serviceIds);
+				appointmentResponseDto.setServices(servicenames);
+			} else {
+				appointmentResponseDto.setOnSpotMechanic(appointmentRequest.isOnSpotMechanic());
 			}
 			appointmentResponseDtos.add(appointmentResponseDto);
 		}
 
 		return appointmentResponseDtos;
+	}
+
+	@Override
+	public AppointmentResponseWithPagingAndSorting getAllBookedAppointments(Integer pageNumber, Integer pageSize,
+			String sortBy, String sortDirc) {
+//		Sort sort = null;
+//		if (sortDirc.equalsIgnoreCase("asc")) {
+//			sort = Sort.by(sortBy).ascending();
+//		} else {
+//			sort = Sort.by(sortBy).descending();
+//		}
+		// using ternary operator instead of if-else
+		Sort sort = (sortDirc.equalsIgnoreCase("asc")?Sort.by(sortBy).ascending():Sort.by(sortBy).descending());
+//		Pageable p = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy)); // this was for when we doing static direction for sorting
+		Pageable p = PageRequest.of(pageNumber, pageSize, sort);
+//		Sort.by(sortBy).ascending() or Sort.by(sortBy).descending() like this by using method chaining we can sort by ascending or desceding also
+		// but instead of doing this, we are doing it dynamically and taking an another
+		// parameter from user to sorting in which direction
+		// we are using Sort.by() method which sort by String properties, we can also
+		// use other overloaded methods to sort according to our needs
+
+		Page<Appointment> Appointmentpage = appointmentrepo.findAll(p); // this will return appointments in pages.
+		List<Appointment> allAppointments = Appointmentpage.getContent();
+
+		List<AppointmentResponsedto> appointmentResponseDtos = new ArrayList<AppointmentResponsedto>();
+
+		for (Appointment appointment : allAppointments) {
+			AppointmentResponsedto appointmentResponseDto = modelmapper.map(appointment, AppointmentResponsedto.class);
+			appointmentResponseDto.setCustomerId(appointment.getCustomer().getId());
+			appointmentResponseDto.setCustomername(appointment.getCustomer().getName());
+			appointmentResponseDto.setGarageId(appointment.getGarage().getId());
+			appointmentResponseDto.setGaragename(appointment.getGarage().getName());
+			appointmentResponseDto.setGarageaddress(appointment.getGarage().getAddress());
+			appointmentResponseDto.setGaragemob(appointment.getGarage().getMobile());
+			if (appointment.getPackagee() != null) {
+				appointmentResponseDto.setPackage_name(appointment.getPackagee().getName());
+			}
+			Set<Services> services = appointment.getServices();
+			if (services != null && !services.isEmpty()) {
+				Set<String> servicenames = new HashSet<>();
+				for (Services service : services) {
+					servicenames.add(service.getName());
+				}
+				appointmentResponseDto.setServices(servicenames);
+			}
+			appointmentResponseDtos.add(appointmentResponseDto);
+		}
+		AppointmentResponseWithPagingAndSorting response = new AppointmentResponseWithPagingAndSorting();
+		response.setContent(appointmentResponseDtos);
+		response.setPageNumber(Appointmentpage.getNumber());
+		response.setPageSize(Appointmentpage.getSize());
+		response.setTotalPages(Appointmentpage.getTotalPages());
+		response.setTotalElements(Appointmentpage.getTotalElements());
+		response.setLastPage(Appointmentpage.isLast());
+
+		return response;
 	}
 
 }

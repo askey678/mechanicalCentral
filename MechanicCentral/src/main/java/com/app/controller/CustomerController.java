@@ -17,8 +17,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.app.dto.ApiResponse;
+import com.app.dto.AppointmentRequestdto;
+import com.app.dto.AppointmentResponsedto;
+import com.app.dto.CustomerAppointmentResponsedto;
 import com.app.dto.Customerdto;
+import com.app.dto.Packagedto;
+import com.app.dto.Servicedto;
+import com.app.service.AppointmentService;
 import com.app.service.CustomerService;
+import com.app.service.PackageService;
+import com.app.service.ServingService;
 
 @RestController
 @RequestMapping("/customer")
@@ -26,11 +34,18 @@ public class CustomerController {
 	@Autowired
 	private CustomerService custServ;
 
+	@Autowired
+	private AppointmentService appointmentService;
+	@Autowired
+	private PackageService packageservice;
+	@Autowired
+	private ServingService servingservice;
+
 	public CustomerController() {
 		super();
 	}
 
-	@PostMapping("/")
+	@PostMapping("/register")
 	public ResponseEntity<Customerdto> createCustomer(@Valid @RequestBody Customerdto custdto) {
 		Customerdto customerdto = custServ.addCustomer(custdto);
 		return new ResponseEntity<Customerdto>(customerdto, HttpStatus.CREATED);
@@ -41,13 +56,9 @@ public class CustomerController {
 		return ResponseEntity.ok(custServ.getallcustomer());
 	}
 
-	@GetMapping("/{UserId}")
-	public ResponseEntity<Customerdto> getCustomerbyId(@PathVariable Long UserId) {
-		return ResponseEntity.ok(custServ.getCustomerbyId(UserId));
-	}
-
 	@PutMapping("/{CustId}")
-	public ResponseEntity<Customerdto> updateCustomer(@Valid @RequestBody Customerdto custdto, @PathVariable Long CustId) {
+	public ResponseEntity<Customerdto> updateCustomer(@Valid @RequestBody Customerdto custdto,
+			@PathVariable Long CustId) {
 		Customerdto updatedcust = custServ.updateUser(custdto, CustId);
 		return ResponseEntity.ok(updatedcust);
 	}
@@ -57,6 +68,34 @@ public class CustomerController {
 		custServ.deleteUser(cid);
 		return new ResponseEntity<ApiResponse>(new ApiResponse("Customer deleted successfully", true), HttpStatus.OK);
 
+	}
+
+	@GetMapping("/packages")
+	public ResponseEntity<List<Packagedto>> getAllPackages() {
+		return ResponseEntity.ok(packageservice.getAllPackages());
+
+	}
+
+	@GetMapping("/services")
+	public ResponseEntity<List<Servicedto>> getAllServices() {
+		return ResponseEntity.ok(servingservice.getAllServices());
+	}
+
+	@PostMapping("/bookappointment/{CustomerId}")
+	public ResponseEntity<?> createAppointment(@PathVariable Long CustomerId,
+			@RequestBody AppointmentRequestdto appointmentRequest) {
+		System.out.println(appointmentRequest);
+		try {
+			AppointmentResponsedto appointmentresponse = appointmentService.bookAppointment(CustomerId,
+					appointmentRequest);
+			return ResponseEntity.ok(appointmentresponse);
+		} catch (RuntimeException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+	@GetMapping("/bookedappointments")
+	public ResponseEntity<List<CustomerAppointmentResponsedto>> getAllAppointments(){
+		return null;
 	}
 
 }
