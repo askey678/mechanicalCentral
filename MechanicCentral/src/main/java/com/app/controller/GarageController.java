@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.app.applicationConfig.ApplicationConstants;
 import com.app.dto.AppointmentRequestdto;
 import com.app.dto.AppointmentResponseWithPagingAndSorting;
 import com.app.dto.AppointmentResponsedto;
 import com.app.dto.Garagedto;
 import com.app.pojos.Garage;
-import com.app.service.AppointmentService;
 import com.app.service.GarageService;
 
 @RestController
@@ -63,10 +63,10 @@ public class GarageController {
 
 	@GetMapping("/bookedappointments")
 	public ResponseEntity<AppointmentResponseWithPagingAndSorting> getAllAppointments(
-			@RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
-			@RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
-			@RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy,
-			@RequestParam(value= "sortDirc", defaultValue = "asc", required=false) String sortDirc) {
+			@RequestParam(value = "pageNumber", defaultValue = ApplicationConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.PAGE_SIZE, required = false) Integer pageSize,
+			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.SORT_BY, required = false) String sortBy,
+			@RequestParam(value= "sortDirc", defaultValue = ApplicationConstants.SORT_DIRC, required=false) String sortDirc) {
 
 		// http://localhost:8080/admin/appointments?pageNumber=0&pageSize=10&sortBy=title
 		// fetching values from RequestParam and if not provided using default values

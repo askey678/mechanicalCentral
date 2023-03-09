@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.app.applicationConfig.ApplicationConstants;
 import com.app.dto.ApiResponse;
-import com.app.dto.AppointmentResponsedto;
 import com.app.dto.AppointmentResponsewithPaging;
 import com.app.dto.Customerdto;
 import com.app.dto.Garagedto;
@@ -150,8 +150,8 @@ public class AdminController {
 
 	@GetMapping("/appointments")
 	public ResponseEntity<AppointmentResponsewithPaging> getAllAppointments(
-			@RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
-			@RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize) {
+			@RequestParam(value = "pageNumber", defaultValue = ApplicationConstants.PAGE_NUMBER, required = false) Integer pageNumber,
+			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.PAGE_SIZE, required = false) Integer pageSize) {
 
 		// http://localhost:8080/admin/appointments?pageNumber=0&pageSize=10
 		// fetching values from RequestParam and if not provided using default values
