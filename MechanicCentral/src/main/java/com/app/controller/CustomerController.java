@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,21 +15,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.app.dto.ApiResponse;
 import com.app.dto.AppointmentRequestdto;
 import com.app.dto.AppointmentResponsedto;
 import com.app.dto.CustomerAppointmentResponsedto;
+import com.app.dto.CustomerLogindto;
 import com.app.dto.Customerdto;
 import com.app.dto.Packagedto;
 import com.app.dto.Servicedto;
+import com.app.pojos.Appointment;
 import com.app.service.AppointmentService;
 import com.app.service.CustomerService;
 import com.app.service.PackageService;
 import com.app.service.ServingService;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/customer")
 public class CustomerController {
 	@Autowired
@@ -49,6 +54,12 @@ public class CustomerController {
 	public ResponseEntity<Customerdto> createCustomer(@Valid @RequestBody Customerdto custdto) {
 		Customerdto customerdto = custServ.addCustomer(custdto);
 		return new ResponseEntity<Customerdto>(customerdto, HttpStatus.CREATED);
+	}
+
+	@GetMapping("/login")
+	public ResponseEntity<Customerdto> Login(@RequestParam String email, @RequestParam String password) {
+		Customerdto custdto = custServ.ValidateCustomer(email, password);
+		return new ResponseEntity<Customerdto>(custdto, HttpStatus.OK);
 	}
 
 	@GetMapping("/")
@@ -93,9 +104,10 @@ public class CustomerController {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
-	@GetMapping("/bookedappointments")
-	public ResponseEntity<List<CustomerAppointmentResponsedto>> getAllAppointments(){
-		return null;
+
+	@GetMapping("/bookedappointments/{CustomerId}")
+	public ResponseEntity<List<AppointmentResponsedto>>getAllAppointments(@PathVariable Long CustomerId) {
+		return ResponseEntity.ok(custServ.bookedAppointments(CustomerId));
 	}
 
 }

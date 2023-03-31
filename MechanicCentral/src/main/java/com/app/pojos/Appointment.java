@@ -11,6 +11,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +28,7 @@ import lombok.ToString;
 @ToString
 
 @Entity
+@JsonIgnoreProperties({"customer"})
 public class Appointment extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "cust_id")
@@ -52,4 +56,6 @@ public class Appointment extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "package_id")
 	private Packages packagee;
+	@OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+	private Payment payment;
 }

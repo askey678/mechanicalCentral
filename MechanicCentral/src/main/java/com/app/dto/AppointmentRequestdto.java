@@ -14,7 +14,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AppointmentRequestdto {
-	private Long customerId;
 	private List<Long> serviceIds;
 	private Long packageId;
 	private boolean onSpotMechanic;

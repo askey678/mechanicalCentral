@@ -157,7 +157,7 @@ public class GarageServiceImpl implements GarageService {
 		appointmentrepo.save(appointment);
 		garg.getAppointments().add(appointment);
 		garagerepo.save(garg);
-		appointmentreqrepo.deleteAll();
+		appointmentreqrepo.delete(appointmentreq);
 
 //		List<Garage> garages = garagerepo.findAll();
 //		for (Garage garage : garages) {

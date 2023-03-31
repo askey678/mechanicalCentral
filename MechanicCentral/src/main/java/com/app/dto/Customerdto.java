@@ -15,6 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Customerdto {
+	private Long id;
 
 	@NotEmpty
 	@Size(min = 4, message = "Username must be of 4 characters!!!!")
